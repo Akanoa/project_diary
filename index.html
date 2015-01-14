@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>OVH Logging</title>
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body ng-app="OVH Logging">
+        <div id="container-content">
+
+        <div class="alert alert-{{alert.type}} alert-dismissible" role="alert" ng-repeat="alert in alerts">
+          <button type="button" class="close" ng-click="deleteAlert($index)" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <p>{{alert.msg}}</p>
+        </div>
+            <h1 class="text-center">OVH Logging</h1>
+            <div class="row" ng-controller="SendCtrl">
+                <div class="col-md-12" id="container-text">
+                    <textarea name="daily_news" id="daily_new" cols="100" rows="10" ng-model="text" placeholder="Rapport de la journée">
+                    </textarea>
+                </div>
+                <div class="col-md-6 col-md-push-2" id="container-tags">
+                    <label for="tags">Tags:</label>
+                    <input type="text" name="tags" id="tags" ng-model="tags" placeholder="tags">
+                </div>
+                <div class="col-md-6 " id="container-tags">
+                    <button class="btn btn-primary" value="Envoyer les données" ng-click="sendToES();">Envoyer les données</button>
+                </div>
+
+                <div class="col-md-6 " id="container-response" ng-show="done">
+                    <p ng-class="{'valid':result.success, 'error':!result.success}">{{result.short}}</p>
+                </div>
+            </div>
+
+            <div class="container" ng-controller="GetCtrl">
+                <div id="container-results" class="row">
+                    <div class="col-md-1">
+                        <button class="btn btn-success" ng-click="getFromES();">Get values</button>
+                    </div>
+                </div>
+
+                <div id="table-results" class="row" ng-show="data">
+                    <div class="col-md-12">
+                        <table class="table table-bordered">
+                            <thead>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Tags</th>
+                                <th>Actions</th>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="log in data">
+                                    <td>{{log._source.date}}</td>
+                                    <td ><div marked="log._source.text"></div></td>
+                                    <td>
+                                        <ul>
+                                            <li ng-repeat="tag in log._source.tags">{{tag}}</li>
+                                        </ul>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-danger" ng-click="deleteFromES(log._id);">Supprimer l'entrée</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <script src="js/jquery.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/angular.min.js"></script>
+        <script src="node_modules/marked/lib/marked.js"></script>
+        <script src="js/angular-marked.min.js"></script>
+        <script src="js/app.js"></script>
+        <script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
+    </body>
+</html>

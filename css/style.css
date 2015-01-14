@@ -1,0 +1,48 @@
+#container-content{
+    width: 90%;
+    margin: 0 auto;
+}
+
+#container-text
+{
+    text-align: center;
+}
+
+#container-text textarea
+{
+    resize : none;
+    padding: 10px;
+}
+
+#container-tags
+{
+    margin-top: 3%;
+}
+
+#tags{
+    width: 58%;
+    padding: 5px;
+}
+
+#container-response{
+    padding: 10px;
+    margin-left: 100px;
+    margin-top: 50px;
+    transition:2s;
+}
+
+#container-results{
+    margin-top: 20px;
+}
+
+#table-results{
+    margin-top: 20px;
+}
+
+.valid{
+    color: green;
+}
+
+.error{
+    color: red;
+}
