@@ -12,6 +12,7 @@
         //set your Elasticsearch host here
         $rootScope.url = "http://46.105.173.108:8889/yguern/ovh_logging";
         $rootScope.alerts = [];
+        $rootScope.edition = false;
 
         $rootScope.deleteAlert = function (id){
             console.log("delete alert "+id)
@@ -38,7 +39,6 @@
         $scope.text   = "";
         $scope.tags   = "";
         $scope.result = "";
-        $scope.done   = false;
 
         $scope.sendToESPromise = /**
         * send Promise to Elastic a daily news request
@@ -90,6 +90,11 @@
     app.controller('GetCtrl', ['$rootScope', '$scope', '$http', '$q', '$filter', function ($rootScope, $scope, $http, $q, $filter) {
 
         $scope.data = false;
+
+        $scope.text_tmp = "";
+        $scope.tags_tmp = "";
+        $scope.id_tmp = "";
+
         $scope.getFromESPromise = /**
         * send Promise to Elastic a daily news request
         **/
@@ -109,7 +114,7 @@
         };
 
         $scope.getFromES = function (){
-            $scope.done = false;
+            console.log("récupération des données");
             $scope.getFromESPromise().then(
             function(data){
                 $scope.data = data.msg.hits.hits;
@@ -130,7 +135,7 @@
 
             $http.delete($rootScope.url+'/'+id).
                 success(function(data, status, headers, config){
-                    var ret = {"status":status, "short":"Logging récupéré", "msg":data, "success":true};
+                    var ret = {"status":status, "short":"Entrée supprimée", "msg":data, "success":true};
                     deffered.resolve(ret);
                 }).
                 error(function (data, status, headers, config){
@@ -148,16 +153,80 @@
             {
                 $scope.deleteFromESPromise(id).then(
                 function(data){
-                    console.log(data);
+                    $rootScope.alerts.push({type:"success", msg:data.short});
                 },
                 function(data){
-                    console.log(data);
+                    $rootScope.alerts.push({type:"danger", msg:data.short});
                 })
                 .finally(function(){
-
+                    $scope.getFromES();
                 });
             }
 
+        };
+
+
+        $scope.editESPromise = /**
+        * send Promise to Elastic a daily news request
+        **/
+        function (id){
+            var deffered = $q.defer();
+
+            params = {
+                doc:
+                {
+                    text : $scope.text_tmp,
+                    tags : $filter('split')($scope.tags_tmp, ";")
+                }
+            };
+
+            $http.post($rootScope.url+'/'+id+'/_update', params).
+                success(function(data, status, headers, config){
+                    var ret = {"status":status, "short":"Entrée modifiée", "msg":data, "success":true};
+                    deffered.resolve(ret);
+                }).
+                error(function (data, status, headers, config){
+                    var ret = {"status":status, "short":"Un problème est survenue lors de la modification des données", "msg":data, "success":false};
+                    deffered.reject(ret);
+                });
+            return deffered.promise;
+        };
+
+        $scope.editES = function (){
+
+            var id = $scope.id_tmp;
+
+            console.log("édition de "+id);
+
+            $scope.editESPromise(id).then(
+            function(data){
+                $rootScope.alerts.push({type:"success", msg:data.short});
+            },
+            function(data){
+                $rootScope.alerts.push({type:"danger", msg:data.short});
+            })
+            .finally(function(){
+                $scope.getFromES();
+                $scope.closeEdition();
+            });
+
+        };
+
+        $scope.editESevent = function (log){
+
+            console.log("édition de "+log._id);
+
+            $rootScope.edition = true;
+            $scope.id_tmp = log._id;
+            $scope.text_tmp = log._source.text;
+            $scope.tags_tmp = log._source.tags.join("; ");
+        };
+
+        $scope.closeEdition = function (){
+            $rootScope.edition = false;
+            $scope.text_tmp = "";
+            $scope.tags_tmp = "";
+            $scope.id_tmp = "";
         };
 
 
