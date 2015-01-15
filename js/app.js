@@ -10,7 +10,7 @@
 
     app.run(function($rootScope){
         //set your Elasticsearch host here
-        $rootScope.url = "http://46.105.173.108:8889/yguern/ovh_logging";
+        $rootScope.url = "http://guern.eu:9200/yguern/ovh_logging";
         $rootScope.alerts = [];
         $rootScope.edition = false;
 
@@ -108,7 +108,7 @@
                 }).
                 error(function (data, status, headers, config){
                     var ret = {"status":status, "short":"Un problème est survenue lors de la récupération des données", "msg":data, "success":false};
-                    deffered.reject("error");
+                    deffered.reject(ret);
                 });
             return deffered.promise;
         };
@@ -120,7 +120,7 @@
                 $scope.data = data.msg.hits.hits;
             },
             function(data){
-                $rootScope.alerts.push({type:"success", msg:data.short});
+                $rootScope.alerts.push({type:"danger", msg:data.short});
             })
             .finally(function(){
 

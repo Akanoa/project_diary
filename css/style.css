@@ -1,17 +1,29 @@
 #container-content{
     width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#daily-container{
+    width: 70%;
     margin: 0 auto;
 }
 
-#container-text
-{
-    text-align: center;
+#daily_new{
+    width: 100%;
 }
 
-#container-text textarea
+#container-text, #container-text-edit
+{
+    text-align: center;
+    width: 100%;
+}
+
+#container-text textarea, #container-text-edit textarea
 {
     resize : none;
     padding: 10px;
+    width: 100%;
 }
 
 #container-tags
@@ -20,16 +32,15 @@
 }
 
 #tags{
-    width: 58%;
+    width: 90%;
     padding: 5px;
 }
 
-#container-response{
-    padding: 10px;
-    margin-left: 100px;
-    margin-top: 50px;
-    transition:2s;
+#tags-edit{
+    width: 80%;
+    padding: 5px;
 }
+
 
 #container-results{
     margin-top: 20px;
@@ -47,26 +58,6 @@
     color: red;
 }
 
-.edit-panel
-{
-    position: absolute;
-    z-index: 10;
-    top: 200px;
-    left: 200px;
-    background-color: rgba(0,0,0,0.1);
-    border-radius: 5px;
-    padding: 70px;
-}
-
-.edit-overlay
-{
-    position: absolute;
-    z-index: 10;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.2);
-    margin-top: -20px;
-}
 
 #list_actions
 {
@@ -87,12 +78,50 @@
 
 .close-cross
 {
-    position: absolute;
+    position: relative;
     z-index: 20;
-    top: 40px;
-    left: 830px;
+    margin-top: -50px;
+    margin-bottom: 20px;
+    margin-left: 99%;
     font-size: 2em;
     color: white;
     text-shadow: 4px 4px 2px rgba(150, 150, 150, 1);
     cursor: pointer;
 }
+
+#edition-container{
+    position: absolute;
+    left: 0;
+    top:0;
+    width: 100%;
+    height: 100%;
+}
+
+.edit-overlay
+{
+    position: absolute;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.2);
+    top:0;
+    left:0;
+}
+
+#edit-panel-container{
+    position: relative;
+    left: 25%;
+    margin-top: 50px;
+}
+
+.edit-panel
+{
+    position: relative;
+    z-index: 11;
+    background-color: rgba(0,0,0,0.1);
+    border-radius: 5px;
+    padding: 70px;
+    width: 50%;
+    height: 50%;
+}
+
