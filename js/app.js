@@ -2,7 +2,7 @@
 
     //-------------------------------------------------------------
 
-    var app = angular.module('OVH Logging', ['hc.marked']);
+    var app = angular.module('OVH Logging', ['hc.marked', 'ui.bootstrap']);
 
     app.config(['markedProvider', function(markedProvider) {
       markedProvider.setOptions({gfm: true});
@@ -10,7 +10,7 @@
 
     app.run(function($rootScope){
         //set your Elasticsearch host here
-        $rootScope.url = "http://guern.eu:9200/yguern/ovh_logging";
+        $rootScope.url = "http://46.105.173.108:8889/yguern/ovh_logging";
         $rootScope.alerts = [];
         $rootScope.edition = false;
 
@@ -39,6 +39,7 @@
         $scope.text   = "";
         $scope.tags   = "";
         $scope.result = "";
+        $scope.dt = null;
 
         $scope.sendToESPromise = /**
         * send Promise to Elastic a daily news request
@@ -50,7 +51,7 @@
             {
                 text : $scope.text,
                 tags : $filter('split')($scope.tags, ";"),
-                date : $filter('date')(new Date(), 'medium')
+                date : $filter("date")($scope.dt, "mediumDate")
             }
             );
 
@@ -85,6 +86,53 @@
                 $scope.tags = "";
             });
         };
+
+
+
+
+
+      $scope.today = function() {
+        $scope.dt = new Date();
+      };
+      $scope.today();
+
+      $scope.clear = function () {
+        $scope.dt = null;
+      };
+
+      // Disable weekend selection
+      $scope.disabled = function(date, mode) {
+        return ( mode === 'day' && ( date.getDay() === 0 || date.getDay() === 6 ) );
+      };
+
+      $scope.toggleMin = function() {
+        $scope.minDate = $scope.minDate ? null : new Date();
+      };
+      $scope.toggleMin();
+
+      $scope.open = function($event) {
+        $event.preventDefault();
+        $event.stopPropagation();
+
+        $scope.opened = true;
+      };
+
+      $scope.close_panel = function(){
+        $rootScope.dt = $scope.dt;
+      }
+
+      $scope.dateOptions = {
+        formatYear: 'yy',
+        startingDay: 1
+      };
+
+      $scope.formats = ['dd-MMMM-yyyy', 'yyyy/MM/dd', 'dd.MM.yyyy', 'shortDate'];
+      $scope.format = $scope.formats[0];
+
+
+
+
+
     }]);
 
     app.controller('GetCtrl', ['$rootScope', '$scope', '$http', '$q', '$filter', function ($rootScope, $scope, $http, $q, $filter) {
@@ -165,6 +213,23 @@
 
         };
 
+        $scope.editESevent = function (log){
+
+            console.log("édition de "+log._id);
+
+            console.log(log);
+
+            $rootScope.edition = true;
+            $rootScope.id_tmp = log._id;
+            $rootScope.text_tmp = log._source.text;
+            $rootScope.tags_tmp = log._source.tags.join("; ");
+
+            console.log($scope);
+        };
+
+    }]);
+
+    app.controller('EditCtrl', ['$rootScope', '$scope', '$http', '$q', '$filter', function ($rootScope, $scope, $http, $q, $filter) {
 
         $scope.editESPromise = /**
         * send Promise to Elastic a daily news request
@@ -194,7 +259,7 @@
 
         $scope.editES = function (){
 
-            var id = $scope.id_tmp;
+            var id = $rootScope.id_tmp;
 
             console.log("édition de "+id);
 
@@ -206,29 +271,22 @@
                 $rootScope.alerts.push({type:"danger", msg:data.short});
             })
             .finally(function(){
-                $scope.getFromES();
                 $scope.closeEdition();
             });
 
         };
 
-        $scope.editESevent = function (log){
-
-            console.log("édition de "+log._id);
-
-            $rootScope.edition = true;
-            $scope.id_tmp = log._id;
-            $scope.text_tmp = log._source.text;
-            $scope.tags_tmp = log._source.tags.join("; ");
-        };
-
         $scope.closeEdition = function (){
             $rootScope.edition = false;
-            $scope.text_tmp = "";
-            $scope.tags_tmp = "";
-            $scope.id_tmp = "";
+            $rootScope.text_tmp = "";
+            $rootScope.tags_tmp = "";
+            $rootScope.id_tmp = "";
         };
 
+    }]);
+
+    app.controller('DatepickerCtrl', ['$rootScope', '$scope', function ($rootScope, $scope) {
 
     }]);
+
 })()
