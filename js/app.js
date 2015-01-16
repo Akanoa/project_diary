@@ -2,22 +2,31 @@
 
     //-------------------------------------------------------------
 
-    var app = angular.module('OVH Logging', ['hc.marked', 'ui.bootstrap']);
+    var app = angular.module('OVH Logging', ['hc.marked', 'ui.bootstrap', 'base64']);
 
     app.config(['markedProvider', function(markedProvider) {
       markedProvider.setOptions({gfm: true});
     }]);
 
-    app.run(function($rootScope){
+    app.run(function($rootScope, $timeout){
         //set your Elasticsearch host here
         $rootScope.url = "http://46.105.173.108:8889/yguern/ovh_logging";
         $rootScope.alerts = [];
         $rootScope.edition = false;
 
         $rootScope.deleteAlert = function (id){
-            console.log("delete alert "+id)
+            $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+                $(".alert").alert('close');
+            });
             if ( ~id ) $rootScope.alerts.splice(id, 1);
-        }
+        };
+
+        $rootScope.addAlert = function(type, msg){
+            $rootScope.alerts.push({type: type, msg:msg});
+            $timeout(function(){
+                $rootScope.deleteAlert($rootScope.alerts.length - 1);
+            }, 5000);
+        };
     });
 
     app.filter('split', function() {
@@ -32,6 +41,13 @@
     app.filter('trim', function() {
         return function trim(str) {
             return str.replace(/^\s+|\s+$/g,"");
+        }
+    });
+
+    app.filter('base64', function($base64){
+        return function base64(input) {
+            console.log("base64");
+            return $base64.encode(input);
         }
     });
 
@@ -76,10 +92,10 @@
 
             $scope.sendToESPromise().then(
             function(data){
-                $rootScope.alerts.push({type:"success", msg:data.short});
+                $rootScope.addAlert("success", data.short);
             },
             function(data){
-                $rootScope.alerts.push({type:"danger", msg:data.short});
+                $rootScope.addAlert("danger", data.short);
             })
             .finally(function(){
                 $scope.text ="";
@@ -162,13 +178,12 @@
         };
 
         $scope.getFromES = function (){
-            console.log("récupération des données");
             $scope.getFromESPromise().then(
             function(data){
                 $scope.data = data.msg.hits.hits;
             },
             function(data){
-                $rootScope.alerts.push({type:"danger", msg:data.short});
+                $rootScope.addAlert("danger", data.short);
             })
             .finally(function(){
 
@@ -195,16 +210,14 @@
 
         $scope.deleteFromES = function (id){
 
-            console.log("suppression de "+id);
-
             if(confirm("Voulez vous vraiment supprimer cette entrée?"))
             {
                 $scope.deleteFromESPromise(id).then(
                 function(data){
-                    $rootScope.alerts.push({type:"success", msg:data.short});
+                    $rootScope.addAlert("success", data.short);
                 },
                 function(data){
-                    $rootScope.alerts.push({type:"danger", msg:data.short});
+                    $rootScope.addAlert("danger", data.short);
                 })
                 .finally(function(){
                     $scope.getFromES();
@@ -215,16 +228,11 @@
 
         $scope.editESevent = function (log){
 
-            console.log("édition de "+log._id);
-
-            console.log(log);
-
             $rootScope.edition = true;
             $rootScope.id_tmp = log._id;
             $rootScope.text_tmp = log._source.text;
             $rootScope.tags_tmp = log._source.tags.join("; ");
 
-            console.log($scope);
         };
 
     }]);
@@ -261,14 +269,12 @@
 
             var id = $rootScope.id_tmp;
 
-            console.log("édition de "+id);
-
             $scope.editESPromise(id).then(
             function(data){
-                $rootScope.alerts.push({type:"success", msg:data.short});
+                $rootScope.addAlert("success", data.short);
             },
             function(data){
-                $rootScope.alerts.push({type:"danger", msg:data.short});
+                $rootScope.addAlert("danger", data.short);
             })
             .finally(function(){
                 $scope.closeEdition();
@@ -289,4 +295,4 @@
 
     }]);
 
-})()
+})();
